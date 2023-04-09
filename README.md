@@ -1,4 +1,4 @@
-# Multitask Mono Camera Perception
+# Multitask Mono Camera Perception - Hydranet
 ## Introduction
 This is my previous work on multitask perception in Forward Camera Settings\
 It mainly contains three tasks:  
