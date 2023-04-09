@@ -5,6 +5,7 @@ It mainly contains three tasks:
 (1) object detection  
 (2) semantic segmentation  
 (3) lane detection
+
  ![](assets/00bf33353949eb1073bebe6e42551fb5.jpg)
 
 
