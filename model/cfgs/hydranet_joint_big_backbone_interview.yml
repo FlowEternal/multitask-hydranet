@@ -1,0 +1,144 @@
+tag: "train_joint_big_backbone"
+train:
+    train_detect: True
+    train_seg: True
+    train_lane: True
+
+    # train config
+    batch_size_train: 4
+    num_worker_train: 0
+    batch_size_valid: 1
+    num_worker_valid: 0
+    lr: 0.00001
+    weight_decay: 0.00000001
+    epoch: 30
+    logs: "logs"
+    print_interval: 10
+    use_distribute: False
+    continue_train: True
+    weight_file: "logs/joint_pretrain_large/model/epoch_0.pth"
+    weight_file_lane: "logs/lane_trained/model/epoch_26.pth"
+    weight_file_det: "logs/det_trained/model/epoch_99.pth"
+    weight_file_seg: "logs/seg_trained/model/epoch_20.pth"
+    fine_tuning: False # set true if adjust each head after some epoch and then joint again else alwayse
+    epoch_tuning: 1
+    tuning_turn: 1
+
+dataloader:
+    data_list: "data/list"
+    network_input_width: 640
+    network_input_height: 640
+
+    # image augmentation
+    with_aug: True
+    do_split: False
+    do_flip: False
+
+
+backbone:
+    initial_width: 24
+    slope: 36
+    quantized_param: 2.5
+    network_depth: 30                   # adjust
+    bottleneck_ratio: 1
+    group_width: 8
+    stride: 2
+    se_ratio: 4
+
+    # bifpn
+    fpn_num_filters: &fpn_num_filters 112               # adjust
+    fpn_cell_repeats: 3                                 # adjust
+    conv_channel_coef: [64, 152, 376, 936]              # adjust
+
+
+detection:
+    class_list: ['__background__',
+                  "roadtext",
+                  "pedestrian",
+                  "guidearrow",
+                  "traffic",
+                  "obstacle",
+                  "vehicle_wheel",
+                  "roadsign",
+                  "vehicle",
+                  "vehicle_light"]
+
+    num_classes: 9
+    fpn_num_filters_detect: *fpn_num_filters
+    aspect_ratios_factor: [1.4, 0.7]
+    scales_factor: [0.0, 0.333, 0.667]
+    box_class_repeats: 3
+    pyramid_levels: 5
+#    anchor_scale: 4.0
+    anchor_scale: 2.0
+
+    max_images: 10000
+
+    loss_cls_weight: 1.0
+    loss_reg_weight: 50.0
+
+    # avg 2.5
+    detection_weight: 1.0
+
+
+segment:
+#    class_list: [ "__background__",
+#                  "pedestrian_area",
+#                  "self_area",
+#                  "obstacle_area",
+#                  "road_area",
+#                  "marking_area",
+#                  "vehicle_area",
+#                  "marking_general_area",
+#                  "marking_pavement_area"]
+#
+#    # cross entropy loss weight
+#    class_weight: [ 0.1, 5.0, 1.0, 5.0, 1.0, 1.0, 1.0, 5.0, 5.0 ]
+
+    class_list: [ "__background__",
+                  "road_area",
+                  "marking_area",
+                  "marking_general_area",
+                  "marking_pavement_area" ]
+
+    # cross entropy loss weight
+    class_weight: [ 0.1, 0.5, 1.0, 5.0, 5.0]
+
+    channel_dimension_seg_encode: [24, *fpn_num_filters, *fpn_num_filters, *fpn_num_filters]
+    channel_dimension_seg_decode: [64, 128, 256, 512]
+
+    # loss function
+    use_top_k: True
+    top_k_ratio: 0.3
+    use_focal: False
+    use_lovasz: False
+#    use_top_k: False
+#    top_k_ratio: 0.3
+#    use_focal: True
+#    use_lovasz: False
+
+    # avg 0.10
+    segment_weight: 5.0
+
+
+lane:
+    anchor_stride: 32
+#    interval: 4
+    interval: 8
+
+    anchor_lane_num: 1
+    interpolate: True
+    scale_invariance: True
+    base_channel: 448
+    num_classes: 2
+    conf_thres: 0.8
+    nms_thres: 100
+
+    loss_cls_pos_weight: 1.0
+    loss_cls_neg_weight: 1.0
+    loss_loc_weight: 1.0
+
+    # avg 30
+    lane_weight: 1.0
+
+
